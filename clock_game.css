@@ -1,0 +1,156 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: transparent;
+}
+
+/* Header Styling */
+/* Header Styling */
+.header {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+    z-index: 1;
+}
+
+.header h1 {
+    background-color: rgba(0, 0, 0, 0.7);
+    display: inline-block;
+    padding: 10px 20px;
+    border: 2px solid yellow;
+    border-radius: 8px;
+    font-size: 1.5em; /* Adjust to your preferred size */
+    color: yellow;
+    line-height: 1.2; /* Adjusts spacing between lines */
+}
+
+
+
+/* Retro Background */
+.retro-background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://images.pond5.com/retro-space-arcade-background-footage-136217916_iconl.jpeg');
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -1;
+}
+
+/* Smaller Clock Styles */
+.clock {
+    position: relative;
+    width: 400px; /* Reduced from 600px */
+    height: 400px; /* Reduced from 600px */
+    border: 15px solid yellow; /* Adjusted border thickness */
+    border-radius: 50%;
+    background: url('https://e1.pxfuel.com/desktop-wallpaper/838/666/desktop-wallpaper-graph-paper-black-purple-grid-dark-orchid-black-purple-aesthetic.jpg');
+    background-size: cover;
+    box-shadow: inset 0px 0px 10px black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Smaller Dot Styles */
+.dot {
+    position: absolute;
+    width: 80px; /* Reduced from 120px */
+    height: 80px; /* Reduced from 120px */
+    background-color: yellow;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px; /* Reduced font size */
+    font-weight: bold;
+    color: yellow;
+    font-family: 'Press Start 2P', cursive; /* Apply the retro font */
+    text-align: center;
+}
+
+/* Adjust the dot background images */
+.dot[data-year="1950"] { background-image: url('https://play-lh.googleusercontent.com/2N1ghrdy0iJcJYzaE2WwUyZpIyjd7W-TWc3E655ARfowejmOSlz5IImlSRgB03hZ7NQ'); background-size: cover; }
+.dot[data-year="1960"] { background-image: url('https://images.crazygames.com/simonsays.png?auto=format,compress&q=75&cs=strip&ch=DPR&w=1200&h=630&fit=crop'); background-size: cover; }
+.dot[data-year="1970"] { background-image: url('https://th.bing.com/th/id/OIP.hiIwe2LHSc8DS_4b2WHlmgAAAA?rs=1&pid=ImgDetMain'); background-size: cover; }
+.dot[data-year="1980"] { background-image: url('https://vignette.wikia.nocookie.net/logopedia/images/a/ab/2000px-Super_Mario_Bros._Logo.svg.png/revision/latest?cb=20121117105207'); background-size: cover; }
+.dot[data-year="1990"] { background-image: url('https://th.bing.com/th/id/OIP.60GzPR4hI_DnW8cfpvHyfwAAAA?rs=1&pid=ImgDetMain'); background-size: cover; }
+.dot[data-year="2000"] { background-image: url('https://th.bing.com/th/id/OIP.Xzg017NUxAt-hvXuRr4K7QHaHa?rs=1&pid=ImgDetMain'); background-size: cover; }
+.dot[data-year="2010"] { background-image: url('https://user-images.githubusercontent.com/66149479/156307377-664d040a-83fd-46bc-8315-6761e819ea0a.png'); background-size: cover; }
+.dot[data-year="2020"] { background-image: url('https://th.bing.com/th/id/OIP.SMtglZsF8csgtL5hL6379gAAAA?rs=1&pid=ImgDetMain'); background-size: cover; }
+
+/* Adjusting the position of the dots for the smaller clock */
+.dot:nth-child(1) { transform: rotate(0deg) translateY(-150px) rotate(0deg); }
+.dot:nth-child(2) { transform: rotate(45deg) translateY(-150px) rotate(-45deg); }
+.dot:nth-child(3) { transform: rotate(90deg) translateY(-150px) rotate(-90deg); }
+.dot:nth-child(4) { transform: rotate(135deg) translateY(-150px) rotate(-135deg); }
+.dot:nth-child(5) { transform: rotate(180deg) translateY(-150px) rotate(-180deg); }
+.dot:nth-child(6) { transform: rotate(225deg) translateY(-150px) rotate(-225deg); }
+.dot:nth-child(7) { transform: rotate(270deg) translateY(-150px) rotate(-270deg); }
+.dot:nth-child(8) { transform: rotate(315deg) translateY(-150px) rotate(-315deg); }
+
+/* Shorter Clock Hand */
+.clock-hand {
+    position: absolute;
+    width: 5px; /* Reduced width */
+    height: 100px; /* Reduced from 150px */
+    background-color: yellow;
+    top: 50%;
+    left: 50%;
+    transform-origin: 50% 0%;
+    transform: translate(-50%, -100%);
+    animation: rotateHand 10s linear infinite;
+}
+
+/* Animation for rotating the clock hand */
+@keyframes rotateHand {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Slideshow Styles */
+#slideshow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.slideshow img {
+    width: 80%;
+    height: auto;
+    max-width: 1200px;
+    border: 5px solid yellow;
+}
+
+button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: yellow;
+    color: black;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: orange;
+}
