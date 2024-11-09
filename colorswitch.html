@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Switch</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #1a1a1a;
+        }
+
+        #game-container {
+            position: relative;
+        }
+
+        canvas {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            display: block;
+        }
+
+        button {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 16px;
+            font-size: 16px;
+            background-color: #333;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .score {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div class="score">Score: 0</div>
+    </div>
+
+    <script>
+        class ColorSwitch {
+            constructor() {
+                this.canvas = document.createElement('canvas');
+                this.canvas.width = 400;
+                this.canvas.height = 400;
+                this.ctx = this.canvas.getContext('2d');
+                
+                this.score = 0;
+                this.player = {
+                    x: this.canvas.width / 2,
+                    y: this.canvas.height - 50,
+                    radius: 15,
+                    color: '#FF6B6B',
+                    moveLeft: false,
+                    moveRight: false,
+                    speed: 3
+                };
+                
+                this.obstacles = [];
+                this.colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
+                this.currentColorIndex = 0;
+                this.gameOver = false;
+                this.speed = 0.8;
+                this.obstacleSpacing = 150;
+
+                const gameContainer = document.getElementById('game-container');
+                gameContainer.appendChild(this.canvas);
+
+                const switchButton = document.createElement('button');
+                switchButton.textContent = 'Switch Color (Spacebar)';
+                switchButton.onclick = () => this.switchColor();
+                gameContainer.appendChild(switchButton);
+
+                this.createInitialObstacles();
+                this.setupControls();
+                this.gameLoop();
+            }
+
+            createInitialObstacles() {
+                for (let i = 0; i < 4; i++) {
+                    this.createObstacle(-50 - (i * this.obstacleSpacing));
+                }
+            }
+
+            setupControls() {
+                document.addEventListener('keydown', (e) => {
+                    switch(e.key) {
+                        case 'ArrowLeft':
+                        case 'a':
+                        case 'A':
+                            this.player.moveLeft = true;
+                            break;
+                        case 'ArrowRight':
+                        case 'd':
+                        case 'D':
+                            this.player.moveRight = true;
+                            break;
+                        case ' ':
+                            if (this.gameOver) {
+                                this.restart();
+                            } else {
+                                this.switchColor();
+                            }
+                            e.preventDefault();
+                            break;
+                        case 'r':
+                        case 'R':
+                            this.restart();
+                            break;
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    switch(e.key) {
+                        case 'ArrowLeft':
+                        case 'a':
+                        case 'A':
+                            this.player.moveLeft = false;
+                            break;
+                        case 'ArrowRight':
+                        case 'd':
+                        case 'D':
+                            this.player.moveRight = false;
+                            break;
+                    }
+                });
+            }
+
+            createObstacle(yPos = 0) {
+                const obstacle = {
+                    x: this.canvas.width / 2,
+                    y: yPos,
+                    width: 300,
+                    height: 20,
+                    colors: [...this.colors].sort(() => Math.random() - 0.5),
+                    sections: 4,
+                    passed: false
+                };
+                this.obstacles.push(obstacle);
+            }
+
+            updatePlayerPosition() {
+                if (this.player.moveLeft) {
+                    this.player.x -= this.player.speed;
+                }
+                if (this.player.moveRight) {
+                    this.player.x += this.player.speed;
+                }
+                
+                this.player.x = Math.max(
+                    this.player.radius, 
+                    Math.min(this.canvas.width - this.player.radius, this.player.x)
+                );
+            }
+
+            drawColorSequence() {
+                const radius = 8;
+                const gap = 5;
+                const startX = this.player.x + this.player.radius + 20;
+                const y = this.player.y;
+
+                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                this.ctx.fillRect(startX - radius - 5, y - radius - 5, 
+                                (radius * 2 + gap) * this.colors.length + 10, radius * 2 + 10);
+
+                this.colors.forEach((color, index) => {
+                    const x = startX + (radius * 2 + gap) * index;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    this.ctx.fillStyle = color;
+                    this.ctx.fill();
+                    this.ctx.closePath();
+
+                    if (index === this.currentColorIndex) {
+                        this.ctx.beginPath();
+                        this.ctx.arc(x, y, radius + 2, 0, Math.PI * 2);
+                        this.ctx.strokeStyle = '#fff';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.stroke();
+                        this.ctx.closePath();
+                    }
+                });
+
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = '12px Arial';
+                this.ctx.textAlign = 'left';
+                this.ctx.fillText('→', startX + (radius * 2 + gap) * this.colors.length + 5, y + 4);
+            }
+
+            drawPlayer() {
+                this.ctx.beginPath();
+                this.ctx.arc(this.player.x, this.player.y, this.player.radius, 0, Math.PI * 2);
+                this.ctx.fillStyle = this.player.color;
+                this.ctx.fill();
+                this.ctx.closePath();
+
+                this.drawColorSequence();
+            }
+
+            drawObstacle(obstacle) {
+                const sectionWidth = obstacle.width / obstacle.sections;
+                for (let i = 0; i < obstacle.sections; i++) {
+                    this.ctx.fillStyle = obstacle.colors[i];
+                    const x = obstacle.x - obstacle.width/2 + (i * sectionWidth);
+                    this.ctx.fillRect(x, obstacle.y, sectionWidth, obstacle.height);
+                    
+                    // Debug hitboxes
+                    // this.ctx.strokeStyle = 'white';
+                    // this.ctx.strokeRect(x, obstacle.y, sectionWidth, obstacle.height);
+                }
+            }
+
+            switchColor() {
+                this.currentColorIndex = (this.currentColorIndex + 1) % this.colors.length;
+                this.player.color = this.colors[this.currentColorIndex];
+            }
+
+            checkCollision(obstacle) {
+                // Get player bounds
+                const playerLeft = this.player.x - this.player.radius;
+                const playerRight = this.player.x + this.player.radius;
+                const playerTop = this.player.y - this.player.radius;
+                const playerBottom = this.player.y + this.player.radius;
+
+                // Get obstacle section width
+                const sectionWidth = obstacle.width / obstacle.sections;
+                const obstacleLeft = obstacle.x - obstacle.width/2;
+
+                // Check if player overlaps with obstacle vertically
+                if (playerBottom >= obstacle.y && playerTop <= obstacle.y + obstacle.height) {
+                    // Find which sections the player is touching
+                    for (let i = 0; i < obstacle.sections; i++) {
+                        const sectionLeft = obstacleLeft + (i * sectionWidth);
+                        const sectionRight = sectionLeft + sectionWidth;
+
+                        // Check if player overlaps with this section
+                        if (playerRight >= sectionLeft && playerLeft <= sectionRight) {
+                            // If colors don't match, game over
+                            if (obstacle.colors[i] !== this.player.color) {
+                                this.gameOver = true;
+                                return;
+                            } else if (!obstacle.passed && this.player.y < obstacle.y + obstacle.height/2) {
+                                // Score only when passing through matching color
+                                this.score += 10;
+                                document.querySelector('.score').textContent = `Score: ${this.score}`;
+                                obstacle.passed = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            restart() {
+                this.gameOver = false;
+                this.score = 0;
+                document.querySelector('.score').textContent = `Score: ${this.score}`;
+                this.obstacles = [];
+                this.speed = 0.8;
+                this.player.x = this.canvas.width / 2;
+                this.createInitialObstacles();
+                this.gameLoop();
+            }
+
+            gameLoop = () => {
+                if (this.gameOver) {
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.font = '30px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillText('Game Over!', this.canvas.width/2, this.canvas.height/2);
+                    this.ctx.font = '20px Arial';
+                    this.ctx.fillText('Press SPACEBAR or R to restart', this.canvas.width/2, this.canvas.height/2 + 40);
+                    return;
+                }
+
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.updatePlayerPosition();
+
+                this.obstacles.forEach((obstacle, index) => {
+                    obstacle.y += this.speed;
+                    this.drawObstacle(obstacle);
+                    this.checkCollision(obstacle);
+
+                    if (obstacle.y > this.canvas.height + 50) {
+                        this.obstacles.splice(index, 1);
+                        const highestObstacle = this.obstacles.reduce((highest, obs) => 
+                            obs.y < highest ? obs.y : highest
+                        , Infinity);
+                        this.createObstacle(highestObstacle - this.obstacleSpacing);
+                        this.speed += 0.15;
+                    }
+                });
+
+                this.drawPlayer();
+
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = '14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('← → or A/D to move | Spacebar to switch colors', 
+                                this.canvas.width/2, 30);
+
+                requestAnimationFrame(this.gameLoop);
+            }
+        }
+
+        // Start game when page loads
+        window.onload = () => new ColorSwitch();
+    </script>
+</body>
+</html>
