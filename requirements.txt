@@ -1,0 +1,34 @@
+- game going through time 
+- 8 games
+- clock decides what game we are in
+- color switch (2020s), flappy bird (2010), bejeweled (2000s),
+  minesweeper (1990s), super mario bros (1980s), space invaders (1970s), 
+  simon says (1960s), tennis for two (1950s)
+
+
+# game_library/
+│
+├── backend/
+│   ├── __init__.py
+│   ├── game_engine.py      # Shared game logic/utilities
+│   └── games/
+│       ├── __init__.py
+│       ├── color_switch.py
+│       ├── flappy_bird.py
+│       ├── bejeweled.py
+│       ├── minesweeper.py
+│       ├── mario.py
+│       ├── space_invaders.py
+│       ├── simon_says.py
+│       └── tennis.py
+│
+├── frontend/
+│   ├── static/
+│   │   ├── js/
+│   │   │   └── game_handlers.js
+│   │   └── css/
+│   │       └── styles.css
+│   └── templates/
+│       └── index.html
+│
+└── app.py                  # Flask/FastAPI server
