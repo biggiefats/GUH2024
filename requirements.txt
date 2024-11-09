@@ -9,26 +9,39 @@
 # game_library/
 │
 ├── backend/
-│   ├── __init__.py
-│   ├── game_engine.py      # Shared game logic/utilities
-│   └── games/
-│       ├── __init__.py
-│       ├── color_switch.py
-│       ├── flappy_bird.py
-│       ├── bejeweled.py
-│       ├── minesweeper.py
-│       ├── mario.py
-│       ├── space_invaders.py
-│       ├── simon_says.py
-│       └── tennis.py
+│   └── game_engine.js      # Shared game logic/utilities
 │
 ├── frontend/
 │   ├── static/
 │   │   ├── js/
-│   │   │   └── game_handlers.js
+│   │   │   ├── game_handlers.js
+│   │   │   ├── color_switch.js
+│   │   │   ├── flappy_bird.js
+│   │   │   ├── bejeweled.js
+│   │   │   ├── minesweeper.js
+│   │   │   ├── mario.js
+│   │   │   ├── space_invaders.js
+│   │   │   ├── simon_says.js
+│   │   │   └── tennis.js
 │   │   └── css/
-│   │       └── styles.css
+│   │       ├── styles.css
+│   │       ├── color_switch.css
+│   │       ├── flappy_bird.css
+│   │       ├── bejeweled.css
+│   │       ├── minesweeper.css
+│   │       ├── mario.css
+│   │       ├── space_invaders.css
+│   │       ├── simon_says.css
+│   │       └── tennis.css
 │   └── templates/
+│       ├── color_switch.html
+│       ├── flappy_bird.html
+│       ├── bejeweled.html
+│       ├── minesweeper.html
+│       ├── mario.html
+│       ├── space_invaders.html
+│       ├── simon_says.html
+│       ├── tennis.html
 │       └── index.html
 │
-└── app.py                  # Flask/FastAPI server
+└── app.js
