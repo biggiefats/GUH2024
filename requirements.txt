@@ -1,0 +1,17 @@
+- game going through time 
+- 8 games
+- clock decides what game we are in
+- color switch (2020s), flappy bird (2010), bejeweled (2000s),
+  minesweeper (1990s), super mario bros (1980s), space invaders (1970s), 
+  simon says (1960s), tennis for two (1950s)
+
+
+# games
+bejewelled - 2000s
+colorswitch - 2020s
+flappybird - 2010s
+minesweeper - 1990s
+snake game - 1980s
+pacman - 1970s
+simon says - 1960s
+tennis for two - 1950s
