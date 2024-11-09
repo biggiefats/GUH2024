@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tennis for Two (Oscilloscope Style)</title>
   <style>
+    /* Previous CSS remains the same */
     body {
       text-align: center;
       font-family: Arial, sans-serif;
@@ -106,25 +107,20 @@
       z-index: 2;
     }
 
-    /* Style for the Next Page Button */
-    .next-page-btn {
-      background-color: #33ff33;
-      color: #000;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    .controls-info {
       margin-top: 20px;
-    }
-
-    .next-page-btn:hover {
-      background-color: #28b828;
+      font-family: 'Press Start 2P', cursive;
+      color: #33ff33;
+      text-align: center;
+      text-shadow: 0 0 5px #33ff33;
     }
   </style>
 </head>
 <body>
   <h1>Tennis for Two</h1>
+  <div class="controls-info">
+    Player 1: W/S keys | Player 2: ↑/↓ arrows
+  </div>
   <div class="oscilloscope-container">
     <div class="oscilloscope-frame"></div>
     <div class="screen-container">
@@ -138,9 +134,6 @@
     <div class="screw"></div>
   </div>
 
-  <!-- Next Page Button -->
-  <button class="next-page-btn" id="nextPageButton">Next Page</button>
-
   <script>
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
@@ -148,6 +141,7 @@
     const paddleWidth = 4;
     const paddleHeight = 40;
     const ballSize = 2;
+    const paddleSpeed = 5;
 
     let ballX = canvas.width / 2;
     let ballY = canvas.height / 2;
@@ -157,16 +151,51 @@
     const leftPaddle = {
       x: canvas.width * 0.1,
       y: canvas.height / 2 - paddleHeight / 2,
-      speed: 0
+      speed: 0,
+      keyUp: 'w',
+      keyDown: 's'
     };
 
     const rightPaddle = {
       x: canvas.width * 0.9,
       y: canvas.height / 2 - paddleHeight / 2,
-      speed: 0
+      speed: 0,
+      keyUp: 'ArrowUp',
+      keyDown: 'ArrowDown'
     };
 
-    const paddleSpeed = 5;
+    // Key state tracking
+    const keys = {};
+
+    function handleKeydown(event) {
+      keys[event.key.toLowerCase()] = true;
+    }
+
+    function handleKeyup(event) {
+      keys[event.key.toLowerCase()] = false;
+    }
+
+    function updatePaddles() {
+      // Left paddle
+      if (keys[leftPaddle.keyUp.toLowerCase()]) {
+        leftPaddle.y -= paddleSpeed;
+      }
+      if (keys[leftPaddle.keyDown.toLowerCase()]) {
+        leftPaddle.y += paddleSpeed;
+      }
+
+      // Right paddle
+      if (keys['arrowup']) {
+        rightPaddle.y -= paddleSpeed;
+      }
+      if (keys['arrowdown']) {
+        rightPaddle.y += paddleSpeed;
+      }
+
+      // Keep paddles within bounds
+      leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
+      rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
+    }
 
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -199,13 +228,16 @@
       // Reset shadow for next frame
       ctx.shadowBlur = 0;
 
+      // Update ball position
       ballX += ballSpeedX;
       ballY += ballSpeedY;
 
+      // Ball collision with top and bottom
       if (ballY <= 0 || ballY >= canvas.height - ballSize) {
         ballSpeedY = -ballSpeedY;
       }
 
+      // Ball collision with paddles
       if (ballX <= leftPaddle.x + paddleWidth && 
           ballY >= leftPaddle.y && 
           ballY <= leftPaddle.y + paddleHeight) {
@@ -218,17 +250,13 @@
         ballSpeedX = -ballSpeedX;
       }
 
+      // Ball out of bounds
       if (ballX < 0 || ballX > canvas.width) {
         resetBall();
       }
 
-      leftPaddle.y += leftPaddle.speed;
-      rightPaddle.y += rightPaddle.speed;
-
-      if (leftPaddle.y < 0) leftPaddle.y = 0;
-      if (leftPaddle.y + paddleHeight > canvas.height) leftPaddle.y = canvas.height - paddleHeight;
-      if (rightPaddle.y < 0) rightPaddle.y = 0;
-      if (rightPaddle.y + paddleHeight > canvas.height) rightPaddle.y = canvas.height - paddleHeight;
+      // Update paddle positions
+      updatePaddles();
     }
 
     function resetBall() {
@@ -238,26 +266,8 @@
       ballSpeedY = (Math.random() * 2 - 1) * 2.5;
     }
 
-    function handleKeydown(event) {
-      if (event.key === "w") leftPaddle.speed = -paddleSpeed;
-      if (event.key === "s") leftPaddle.speed = paddleSpeed;
-      if (event.key === "ArrowUp") rightPaddle.speed = -paddleSpeed;
-      if (event.key === "ArrowDown") rightPaddle.speed = paddleSpeed;
-    }
-
-    function handleKeyup(event) {
-      if (event.key === "w" || event.key === "s") leftPaddle.speed = 0;
-      if (event.key === "ArrowUp" || event.key === "ArrowDown") rightPaddle.speed = 0;
-    }
-
     document.addEventListener("keydown", handleKeydown);
     document.addEventListener("keyup", handleKeyup);
-
-    // Next Page Button functionality
-    document.getElementById('nextPageButton').addEventListener('click', () => {
-      alert("Navigating to the next page...");
-      // Replace with actual navigation or page change code, e.g. window.location.href = "nextPage.html";
-    });
 
     function gameLoop() {
       draw();

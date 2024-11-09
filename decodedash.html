@@ -43,6 +43,25 @@
             to { transform: translate(-50%, -100%) rotate(360deg); }
         }
 
+        @keyframes particleFade {
+            0% { opacity: 1; transform: translate(0, 0) rotate(0deg); }
+            100% { opacity: 0; transform: translate(var(--x), var(--y)) rotate(var(--r)); }
+        }
+
+        @keyframes particleFloatRight {
+            0% { transform: translateX(-100vw) translateY(var(--y)); }
+            100% { transform: translateX(100vw) translateY(var(--y)); }
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
         body {
             background: linear-gradient(45deg, #ff0000, #ff4400, #ff6600, #ff8800, #ffaa00, #ffcc00, #ffee00);
             background-size: 400% 400%;
@@ -53,14 +72,16 @@
             overflow: hidden;
             position: relative;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            justify-content: center;
+            min-height: 100vh;
         }
 
         .header {
-            position: absolute;
+            position: fixed;
             top: 20px;
+            left: 0;
             width: 100%;
             text-align: center;
             z-index: 1;
@@ -80,10 +101,106 @@
             box-shadow: 0 0 20px rgba(255, 102, 0, 0.5);
         }
 
-        .retro-background {
-            position: absolute;
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            animation: particleFade 2s forwards;
+            mix-blend-mode: screen;
+            will-change: transform;
+        }
+
+        /* Particle styles for each decade */
+        .particle.tennis {
+            width: 10px;
+            height: 10px;
+            background: #33ff33;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #33ff33;
+            filter: blur(1px);
+        }
+
+        .particle.simon {
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(45deg, #ff0000, #00ff00, #0000ff, #ffff00);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+
+        .particle.pacman {
+            width: 12px;
+            height: 12px;
+            background: #ffff00;
+            clip-path: polygon(100% 50%, 15% 0%, 15% 100%);
+        }
+
+        .particle.snake {
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 2px;
+            box-shadow: 0 0 8px #00ff00;
+        }
+
+        .particle.minesweeper {
+            width: 12px;
+            height: 12px;
+            background: #808080;
+            clip-path: polygon(35% 0, 65% 0, 100% 35%, 100% 65%, 65% 100%, 35% 100%, 0 65%, 0 35%);
+        }
+
+        .particle.bejeweled {
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            border-radius: 2px;
+        }
+
+        .particle.flappy {
+            width: 10px;
+            height: 8px;
+            background: #ffd700;
+            clip-path: polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%);
+        }
+
+        .particle.colorswitch {
+            width: 12px;
+            height: 12px;
+            background: conic-gradient(from 0deg, #ff0000, #00ff00, #0000ff, #ff0000);
+            border-radius: 50%;
+            animation: particleFade 2s forwards, spin 1s linear infinite;
+        }
+
+        .flying-element {
+            position: absolute;
+            animation: particleFloatRight 10s linear;
+            opacity: 0.5;
+        }
+
+        /* Flying elements for each decade */
+        .flying-element.fifties { content: "10101"; font-family: monospace; color: #33ff33; font-size: 20px; }
+        .flying-element.sixties { content: "✌️"; font-family: 'Press Start 2P'; color: #ff6b6b; font-size: 24px; }
+        .flying-element.seventies { content: "⭐"; background: linear-gradient(45deg, #ff6b6b, #ff8e53); -webkit-background-clip: text; color: transparent; font-size: 28px; }
+        .flying-element.eighties { content: "▲"; color: #ff00ff; text-shadow: 2px 2px #00ffff; font-size: 20px; }
+        .flying-element.nineties { content: "www"; font-family: 'Times New Roman'; color: #00ff00; font-size: 16px; }
+        .flying-element.twothousands { content: "📱"; background: linear-gradient(45deg, #ff00ff, #00ffff); -webkit-background-clip: text; color: transparent; font-size: 24px; }
+        .flying-element.twentytens { content: "🚀"; color: #ffffff; font-size: 20px; }
+        .flying-element.twentytwenties { content: "🤖"; background: linear-gradient(45deg, #00ff00, #00ffff); -webkit-background-clip: text; color: transparent; font-size: 24px; }
+
+        .retro-background {
+            position: relative;
+            width: 100%;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -260,15 +377,11 @@
             z-index: -1;
             animation: gridMove 20s linear infinite;
         }
-
-        @keyframes gridMove {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(50px); }
-        }
     </style>
 </head>
 <body>
     <div class="grid-overlay"></div>
+    <div class="particle-container"></div>
     <header class="header" id="header">
         <h1>Welcome to Decade Dash!<br>Click a decade to play!</h1>
     </header>
@@ -329,6 +442,67 @@
         const clockHand = document.querySelector('.clock-hand');
         let isFirstClick = true;
 
+        function createParticle(x, y, type) {
+            const particle = document.createElement('div');
+            particle.className = `particle ${type}`;
+            
+            // Random position variance
+            const randomX = (Math.random() - 0.5) * 200;
+            const randomY = (Math.random() - 0.5) * 200;
+            const randomRotation = Math.random() * 360;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+            particle.style.setProperty('--x', `${randomX}px`);
+            particle.style.setProperty('--y', `${randomY}px`);
+            particle.style.setProperty('--r', `${randomRotation}deg`);
+            
+            return particle;
+        }
+
+        function createFlyingElement(decade) {
+            const element = document.createElement('div');
+            const decadeClasses = {
+                '1950': 'fifties',
+                '1960': 'sixties',
+                '1970': 'seventies',
+                '1980': 'eighties',
+                '1990': 'nineties',
+                '2000': 'twothousands',
+                '2010': 'twentytens',
+                '2020': 'twentytwenties'
+            };
+            element.className = `flying-element ${decadeClasses[decade]}`;
+            element.style.setProperty('--y', `${Math.random() * window.innerHeight}px`);
+            return element;
+        }
+
+        function spawnParticles(x, y, type, decade) {
+            const container = document.querySelector('.particle-container');
+            
+            // Create multiple particles
+            for (let i = 0; i < 30; i++) {
+                const particle = createParticle(x, y, type);
+                container.appendChild(particle);
+                
+                // Remove particle after animation
+                particle.addEventListener('animationend', () => {
+                    particle.remove();
+                });
+            }
+            
+            // Create flying elements
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                    const element = createFlyingElement(decade);
+                    container.appendChild(element);
+                    element.addEventListener('animationend', () => {
+                        element.remove();
+                    });
+                }, i * 200);
+            }
+        }
+
         function loadGame(gamePath) {
             gameFrame.src = gamePath;
             gameFrame.classList.add('show');
@@ -336,6 +510,7 @@
             background.style.opacity = '0';
             header.style.opacity = '0';
         }
+
         backButton.addEventListener('click', () => {
             gameFrame.classList.remove('show');
             backButton.classList.remove('show');
@@ -349,32 +524,75 @@
             clockHand.style.transform = 'translate(-50%, -100%) rotate(0deg)';
         });
 
+        const particleTypes = {
+            '1950': 'tennis',
+            '1960': 'simon',
+            '1970': 'pacman',
+            '1980': 'snake',
+            '1990': 'minesweeper',
+            '2000': 'bejeweled',
+            '2010': 'flappy',
+            '2020': 'colorswitch'
+        };
+
         dots.forEach(dot => {
-            dot.addEventListener('click', () => {
+            dot.addEventListener('click', (event) => {
                 const gamePath = dot.getAttribute('data-game');
+                const decade = dot.getAttribute('data-year');
                 
-                if (isFirstClick) {
-                    // For first click, do smooth animation
-                    const index = Array.from(dots).indexOf(dot);
-                    const dotPosition = index * 45; // 360 degrees / 8 dots = 45 degrees per dot
-                    const rotations = 2; // Number of full rotations before landing
-                    const finalRotation = (rotations * 360) + dotPosition;
+                // Get click position relative to dot
+                const rect = dot.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                
+                // Spawn particles
+                spawnParticles(x, y, particleTypes[decade], decade);
+                
+                // Stop any current animation
+                clockHand.style.animation = 'none';
+                
+                // Calculate the angle for this dot
+                const index = Array.from(dots).indexOf(dot);
+                const dotAngle = (index / 8) * 360; // 8 dots total, evenly spaced
+                
+                // First, smoothly rotate to the dot's position
+                clockHand.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+                clockHand.style.transform = `translate(-50%, -100%) rotate(${dotAngle}deg)`;
+                
+                // After reaching the dot's position, pause briefly
+                setTimeout(() => {
+                    // Then do the celebratory spins
+                    const rotations = 2;
+                    const finalRotation = (rotations * 360) + dotAngle;
                     
-                    // Stop default animation
-                    clockHand.style.animation = 'none';
-                    clockHand.style.transition = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)';
+                    clockHand.style.transition = 'transform 1.5s cubic-bezier(0.4, 0, 0.2, 1)';
                     clockHand.style.transform = `translate(-50%, -100%) rotate(${finalRotation}deg)`;
                     
+                    // Load game after the animation
                     setTimeout(() => {
                         loadGame(gamePath);
-                    }, 2000);
-                    
-                    isFirstClick = false;
-                } else {
-                    // For subsequent clicks, load game immediately
-                    loadGame(gamePath);
-                }
+                    }, 1500);
+                }, 1000); // Pause for 1 second at the dot's position
             });
+        });
+
+        // Modify the back button handler to properly reset the clock hand
+        backButton.addEventListener('click', () => {
+            gameFrame.classList.remove('show');
+            backButton.classList.remove('show');
+            background.style.opacity = '1';
+            header.style.opacity = '1';
+            gameFrame.src = '';
+            
+            // Reset the clock hand with a smooth transition back to 0
+            clockHand.style.transition = 'transform 1s cubic-bezier(0.4, 0, 0.2, 1)';
+            clockHand.style.transform = 'translate(-50%, -100%) rotate(0deg)';
+            
+            // After returning to 0, restart the continuous rotation
+            setTimeout(() => {
+                clockHand.style.transition = 'none';
+                clockHand.style.animation = 'rotateHand 10s linear infinite';
+            }, 1000);
         });
     </script>
 </body>
