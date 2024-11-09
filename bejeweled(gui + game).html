@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bejeweled</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #1a1a1a;
+            flex-direction: column;
+            color: #fff;
+        }
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(5, 60px);
+            grid-template-rows: repeat(5, 60px);
+            gap: 2px;
+            background-color: #2d2d2d;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, filter 0.2s;
+            position: relative;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: brightness(1.2) contrast(1.2);
+        }
+
+        .cell:hover {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: inherit;
+            border-radius: inherit;
+            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .red {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #ff0000);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+
+        .blue {
+            background: radial-gradient(circle at 30% 30%, #6b9fff, #0055ff);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+
+        .green {
+            background: radial-gradient(circle at 30% 30%, #6bff6b, #00ff00);
+            clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+        }
+
+        .yellow {
+            background: radial-gradient(circle at 30% 30%, #ffeb6b, #ffd700);
+            clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+        }
+
+        .purple {
+            background: radial-gradient(circle at 30% 30%, #ff6bff, #800080);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+        }
+
+        .orange {
+            background: radial-gradient(circle at 30% 30%, #ffb16b, #ff8c00);
+            clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%);
+        }
+
+        #timer, #score {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .game-over {
+            font-size: 36px;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-top: 20px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .game-button {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            background: linear-gradient(45deg, #2c3e50, #3498db);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5),
+                        inset 0 0 5px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-button:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 0 25px rgba(52, 152, 219, 0.7),
+                        inset 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .game-button:active {
+            transform: scale(0.98) translateY(1px);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.3),
+                        inset 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="timer">Time left: 60s</div>
+    <div id="score">Score: 0</div>
+    <div id="game-board"></div>
+    <div class="game-over" id="game-over-message" style="display: none;">Game Over!</div>
+    <div class="button-container">
+        <button class="game-button" id="reset-button">Reset Game</button>
+    </div>
+    
+    <script>
+        const boardSize = 5;
+        const gemTypes = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        let board = [];
+        let selectedCell = null;
+        let gameOver = false;
+        let timer = 60; // Game time in seconds
+        let timerInterval;
+        let score = 0; // Initialize score
+
+        function createBoard() {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = ''; // Clear any previous grid
+
+            // Generate the board with random gems
+            for (let row = 0; row < boardSize; row++) {
+                const rowArr = [];
+                for (let col = 0; col < boardSize; col++) {
+                    const gem = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+                    rowArr.push(gem);
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell', gem);
+                    cell.setAttribute('data-row', row);
+                    cell.setAttribute('data-col', col);
+                    cell.addEventListener('click', () => handleCellClick(row, col, cell));
+                    gameBoard.appendChild(cell);
+                }
+                board.push(rowArr);
+            }
+        }
+
+        function handleCellClick(row, col, cell) {
+            if (gameOver) return; // If the game is over, don't allow further interactions
+
+            if (selectedCell === null) {
+                // First click: select the gem
+                selectedCell = { row, col, element: cell };
+                cell.style.border = '2px solid black';  // Highlight selected cell
+            } else {
+                // Second click: swap the gem with the selected one
+                if (isAdjacent(row, col)) {
+                    swapGems(selectedCell.row, selectedCell.col, row, col);
+                    checkAndRemoveMatches();
+                    selectedCell.element.style.border = '';  // Remove highlight from the first selected cell
+                    selectedCell = null;
+                } else {
+                    // Deselect if not adjacent
+                    selectedCell.element.style.border = '';
+                    selectedCell = null;
+                }
+            }
+        }
+
+        function isAdjacent(row, col) {
+            const selected = selectedCell;
+            return (Math.abs(selected.row - row) === 1 && selected.col === col) || 
+                   (Math.abs(selected.col - col) === 1 && selected.row === row);
+        }
+
+        function swapGems(row1, col1, row2, col2) {
+            // Swap the gem types in the board array
+            const temp = board[row1][col1];
+            board[row1][col1] = board[row2][col2];
+            board[row2][col2] = temp;
+
+            // Swap the gem elements in the grid (UI)
+            const cell1 = document.querySelector(`[data-row="${row1}"][data-col="${col1}"]`);
+            const cell2 = document.querySelector(`[data-row="${row2}"][data-col="${col2}"]`);
+            const gem1 = cell1.classList[1];
+            const gem2 = cell2.classList[1];
+
+            cell1.classList.replace(gem1, gem2);
+            cell2.classList.replace(gem2, gem1);
+        }
+
+        function checkAndRemoveMatches() {
+            const cellsToRemove = [];
+
+            // Check rows for matches
+            for (let row = 0; row < boardSize; row++) {
+                for (let col = 0; col < boardSize - 2; col++) {
+                    const gem = board[row][col];
+                    if (board[row][col + 1] === gem && board[row][col + 2] === gem) {
+                        cellsToRemove.push({ row, col });
+                        cellsToRemove.push({ row, col: col + 1 });
+                        cellsToRemove.push({ row, col: col + 2 });
+                    }
+                }
+            }
+
+            // Check columns for matches
+            for (let col = 0; col < boardSize; col++) {
+                for (let row = 0; row < boardSize - 2; row++) {
+                    const gem = board[row][col];
+                    if (board[row + 1][col] === gem && board[row + 2][col] === gem) {
+                        cellsToRemove.push({ row, col });
+                        cellsToRemove.push({ row: row + 1, col });
+                        cellsToRemove.push({ row: row + 2, col });
+                    }
+                }
+            }
+
+            // Remove matched gems and update score
+            if (cellsToRemove.length > 0) {
+                score += cellsToRemove.length * 10; // Increment score by 10 points per match
+                document.getElementById('score').innerText = `Score: ${score}`;
+
+                cellsToRemove.forEach(cell => {
+                    const { row, col } = cell;
+                    board[row][col] = null;
+                    const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    cellElement.classList.remove(...gemTypes);
+                });
+
+                // Drop down new gems to fill the empty spaces
+                dropGems();
+            }
+        }
+
+        function dropGems() {
+            for (let col = 0; col < boardSize; col++) {
+                let emptySpaces = 0;
+                for (let row = boardSize - 1; row >= 0; row--) {
+                    if (board[row][col] === null) {
+                        emptySpaces++;
+                    } else if (emptySpaces > 0) {
+                        // Move gem down
+                        const gem = board[row][col];
+                        board[row][col] = null;
+                        board[row + emptySpaces][col] = gem;
+                        const cellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        const newCellElement = document.querySelector(`[data-row="${row + emptySpaces}"][data-col="${col}"]`);
+                        newCellElement.classList.add(gem);
+                        cellElement.classList.remove(gem);
+                    }
+                }
+
+                // Add new gems to the top
+                for (let row = 0; row < emptySpaces; row++) {
+                    const gem = gemTypes[Math.floor(Math.random() * gemTypes.length)];
+                    board[row][col] = gem;
+                    const newCellElement = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    newCellElement.classList.add(gem);
+                }
+            }
+        }
+
+        // Timer functions
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer--;
+                document.getElementById('timer').innerText = `Time left: ${timer}s`;
+                if (timer <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            gameOver = true;
+            document.getElementById('game-over-message').style.display = 'block';
+        }
+
+        function resetGame() {
+            // Reset game variables
+            gameOver = false;
+            timer = 60;
+            score = 0;
+            board = [];
+            document.getElementById('game-over-message').style.display = 'none';
+            document.getElementById('score').innerText = `Score: 0`;
+            document.getElementById('timer').innerText = `Time left: 60s`;
+
+            // Create a new board and start the game again
+            createBoard();
+            startTimer();
+        }
+
+        // Start the game
+        createBoard();
+        startTimer();
+
+        // Add event listener for the reset button
+        document.getElementById('reset-button').addEventListener('click', resetGame);
+    </script>
+</body>
+</html>
