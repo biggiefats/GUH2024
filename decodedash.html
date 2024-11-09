@@ -13,24 +13,14 @@
         }
 
         @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-            50% {
-                background-position: 100% 50%;
-            }
-            100% {
-                background-position: 0% 50%;
-            }
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
 
         @keyframes floatClock {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
 
         @keyframes glowPulse {
@@ -54,16 +44,7 @@
         }
 
         body {
-            background: linear-gradient(
-                45deg, 
-                #ff0000, 
-                #ff4400,
-                #ff6600,
-                #ff8800,
-                #ffaa00,
-                #ffcc00,
-                #ffee00
-            );
+            background: linear-gradient(45deg, #ff0000, #ff4400, #ff6600, #ff8800, #ffaa00, #ffcc00, #ffee00);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             color: yellow;
@@ -83,6 +64,7 @@
             width: 100%;
             text-align: center;
             z-index: 1;
+            transition: opacity 0.5s;
         }
 
         .header h1 {
@@ -119,33 +101,32 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            animation: 
-                floatClock 4s ease-in-out infinite,
-                glowPulse 2s ease-in-out infinite;
+            animation: floatClock 4s ease-in-out infinite,
+                       glowPulse 2s ease-in-out infinite;
         }
 
-            .dot {
-        position: absolute;
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 14px;
-        font-weight: bold;
-        color: yellow;
-        text-align: center;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        cursor: pointer;
-        z-index: 2;
-        border: 4px solid #ff6600;
-        overflow: hidden;
-        box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
-        background-position: center;
-        background-size: cover;
-        background-repeat: no-repeat;
-    }
+        .dot {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            font-weight: bold;
+            color: yellow;
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            z-index: 2;
+            border: 4px solid #ff6600;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
 
         .dot::before {
             content: '';
@@ -162,13 +143,6 @@
 
         .dot:hover::before {
             opacity: 1;
-        }
-
-        .dot img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            pointer-events: none;
         }
 
         /* Dot Positions */
@@ -212,11 +186,10 @@
             width: 200px;
             font-size: 1em;
             color: #ffee00;
-            text-shadow: 
-                2px 2px 0 #ff4400,
-                -2px -2px 0 #ff4400,
-                2px -2px 0 #ff4400,
-                -2px 2px 0 #ff4400;
+            text-shadow: 2px 2px 0 #ff4400,
+                        -2px -2px 0 #ff4400,
+                        2px -2px 0 #ff4400,
+                        -2px 2px 0 #ff4400;
             pointer-events: none;
             opacity: 0;
             transition: all 0.3s;
@@ -274,16 +247,14 @@
             box-shadow: 0 0 30px rgba(255, 102, 0, 0.8);
         }
 
-        /* Grid overlay */
         .grid-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: 
-                linear-gradient(rgba(255, 68, 0, 0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 68, 0, 0.1) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(255, 68, 0, 0.1) 1px, transparent 1px),
+                            linear-gradient(90deg, rgba(255, 68, 0, 0.1) 1px, transparent 1px);
             background-size: 50px 50px;
             pointer-events: none;
             z-index: -1;
@@ -291,12 +262,8 @@
         }
 
         @keyframes gridMove {
-            0% {
-                transform: translateY(0);
-            }
-            100% {
-                transform: translateY(50px);
-            }
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
         }
     </style>
 </head>
@@ -360,35 +327,55 @@
         const background = document.querySelector('.retro-background');
         const header = document.querySelector('.header');
         const clockHand = document.querySelector('.clock-hand');
+        let isFirstClick = true;
 
-        function calculateDotPosition(dot) {
-            const index = Array.from(dots).indexOf(dot);
-            return index * 45; // 360 degrees / 8 dots = 45 degrees per dot
+        function loadGame(gamePath) {
+            gameFrame.src = gamePath;
+            gameFrame.classList.add('show');
+            backButton.classList.add('show');
+            background.style.opacity = '0';
+            header.style.opacity = '0';
         }
+        backButton.addEventListener('click', () => {
+            gameFrame.classList.remove('show');
+            backButton.classList.remove('show');
+            background.style.opacity = '1';
+            header.style.opacity = '1';
+            gameFrame.src = '';
+            
+            // Reset clock hand animation
+            clockHand.style.animation = 'rotateHand 10s linear infinite';
+            clockHand.style.transition = 'none';
+            clockHand.style.transform = 'translate(-50%, -100%) rotate(0deg)';
+        });
 
         dots.forEach(dot => {
             dot.addEventListener('click', () => {
-                const decade = dot.getAttribute('data-year');
                 const gamePath = dot.getAttribute('data-game');
                 
-                // Stop default animation
-                clockHand.style.animation = 'none';
-                
-                // Calculate exact rotation to point to the selected dot
-                const dotPosition = calculateDotPosition(dot);
-                const rotations = 3; // Number of full rotations before landing
-                const finalRotation = (rotations * 360) + dotPosition;
-                
-                clockHand.style.transition = 'transform 3s cubic-bezier(0.4, 0, 0.2, 1)';
-                clockHand.style.transform = `translate(-50%, -100%) rotate(${finalRotation}deg)`;
-
-                setTimeout(() => {
+                if (isFirstClick) {
+                    // For first click, do smooth animation
+                    const index = Array.from(dots).indexOf(dot);
+                    const dotPosition = index * 45; // 360 degrees / 8 dots = 45 degrees per dot
+                    const rotations = 2; // Number of full rotations before landing
+                    const finalRotation = (rotations * 360) + dotPosition;
+                    
+                    // Stop default animation
+                    clockHand.style.animation = 'none';
+                    clockHand.style.transition = 'transform 2s cubic-bezier(0.4, 0, 0.2, 1)';
+                    clockHand.style.transform = `translate(-50%, -100%) rotate(${finalRotation}deg)`;
+                    
+                    setTimeout(() => {
+                        loadGame(gamePath);
+                    }, 2000);
+                    
+                    isFirstClick = false;
+                } else {
+                    // For subsequent clicks, load game immediately
                     loadGame(gamePath);
-                }, 3000);
+                }
             });
         });
-
-        // [Previous JavaScript functions remain the same]
     </script>
 </body>
 </html>
