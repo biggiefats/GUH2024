@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Press Start 2P', cursive;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://static.vecteezy.com/system/resources/previews/022/010/146/non_2x/galaxy-with-stars-space-background-vector.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+
+        .arcade-cabinet {
+            position: relative;
+            width: min(500px, 90vw);
+            height: min(700px, 90vh);
+            background: rgba(42, 42, 42, 0.95);
+            border-radius: 20px 20px 0 0;
+            padding: 15px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            perspective: 1000px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .arcade-top {
+            position: relative;
+            height: 40px;
+            background: #ff3333;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #1a1a1a;
+            font-size: 16px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+            margin-bottom: 15px;
+        }
+
+        .screen-bezel {
+            position: relative;
+            width: 100%;
+            flex-grow: 1;
+            background: #000;
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .controls {
+            height: 80px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .joystick {
+            width: 40px;
+            height: 40px;
+            background: #ff3333;
+            border-radius: 50%;
+            border: 6px solid #1a1a1a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .button {
+            width: 30px;
+            height: 30px;
+            background: #ff3333;
+            border-radius: 50%;
+            border: 4px solid #1a1a1a;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .cabinet-stripe {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 15px;
+            background: #ff3333;
+        }
+
+        .stripe-left {
+            left: 0;
+            border-radius: 10px 0 0 0;
+        }
+
+        .stripe-right {
+            right: 0;
+            border-radius: 0 10px 0 0;
+        }
+
+        /* Tennis for Two specific styles */
+        .oscilloscope-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: auto;
+            border-radius: 50%;
+            background: #1a1a1a;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .oscilloscope-frame {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #2c2c2c, #404040);
+            z-index: 1;
+        }
+
+        .screen-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background: #000;
+            z-index: 2;
+        }
+
+        canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: #000;
+            filter: brightness(1.2) sepia(100%) hue-rotate(70deg) saturate(150%);
+        }
+
+        .screen-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(
+                circle,
+                transparent 50%,
+                rgba(0, 0, 0, 0.1) 80%,
+                rgba(0, 0, 0, 0.3) 100%
+            );
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .screw {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #666;
+            border-radius: 50%;
+            border: 2px solid #444;
+            z-index: 4;
+        }
+
+        .screw:nth-child(1) { top: 15px; left: 15px; }
+        .screw:nth-child(2) { top: 15px; right: 15px; }
+        .screw:nth-child(3) { bottom: 15px; left: 15px; }
+        .screw:nth-child(4) { bottom: 15px; right: 15px; }
+
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(51, 255, 51, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(51, 255, 51, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .controls-info {
+            position: absolute;
+            bottom: 10px;
+            color: #33ff33;
+            font-size: 12px;
+            text-align: center;
+            width: 100%;
+            text-shadow: 0 0 5px #33ff33;
+        }
+    </style>
+</head>
+<body>
+    <div class="arcade-cabinet">
+        <div class="cabinet-stripe stripe-left"></div>
+        <div class="cabinet-stripe stripe-right"></div>
+        <div class="arcade-top">TENNIS FOR TWO</div>
+        <div class="screen-bezel">
+            <div class="oscilloscope-container">
+                <div class="oscilloscope-frame"></div>
+                <div class="screen-container">
+                    <div class="grid"></div>
+                    <canvas id="gameCanvas" width="350" height="350"></canvas>
+                    <div class="screen-overlay"></div>
+                </div>
+                <div class="screw"></div>
+                <div class="screw"></div>
+                <div class="screw"></div>
+                <div class="screw"></div>
+
+            </div>
+        </div>
+        <div class="controls">
+            <div class="joystick"></div>
+            <div class="buttons">
+                <div class="button"></div>
+                <div class="button"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Original game logic remains exactly the same
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const paddleWidth = 4;
+        const paddleHeight = 40;
+        const ballSize = 2;
+        const trailLength = 10;
+
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballSpeedX = 2.5;
+        let ballSpeedY = 1.5;
+        let trailPositions = [];
+
+        const leftPaddle = {
+            x: canvas.width * 0.1,
+            y: canvas.height / 2 - paddleHeight / 2,
+            speed: 0
+        };
+
+        const rightPaddle = {
+            x: canvas.width * 0.9,
+            y: canvas.height / 2 - paddleHeight / 2,
+            speed: 0
+        };
+
+        const paddleSpeed = 5;
+
+        function draw() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.strokeStyle = "#33ff33";
+            ctx.lineWidth = 2;
+            
+            ctx.beginPath();
+            ctx.setLineDash([5, 5]);
+            ctx.moveTo(canvas.width/2, 0);
+            ctx.lineTo(canvas.width/2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            trailPositions.unshift({x: ballX, y: ballY});
+            if (trailPositions.length > trailLength) {
+                trailPositions.pop();
+            }
+
+            trailPositions.forEach((pos, index) => {
+                const alpha = (trailLength - index) / trailLength;
+                ctx.fillStyle = `rgba(51, 255, 51, ${alpha * 0.5})`;
+                ctx.shadowColor = "#33ff33";
+                ctx.shadowBlur = 5;
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, ballSize * (1 - index/trailLength), 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = "#33ff33";
+            ctx.shadowColor = "#33ff33";
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballSize, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = "#33ff33";
+            ctx.fillRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight);
+
+            ctx.shadowBlur = 0;
+
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            if (ballY <= 0 || ballY >= canvas.height - ballSize) {
+                ballSpeedY = -ballSpeedY;
+            }
+
+            if (ballX <= leftPaddle.x + paddleWidth && 
+                ballY >= leftPaddle.y && 
+                ballY <= leftPaddle.y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+            
+            if (ballX >= rightPaddle.x - ballSize && 
+                ballY >= rightPaddle.y && 
+                ballY <= rightPaddle.y + paddleHeight) {
+                ballSpeedX = -ballSpeedX;
+            }
+
+            if (ballX < 0 || ballX > canvas.width) {
+                resetBall();
+            }
+
+            leftPaddle.y += leftPaddle.speed;
+            rightPaddle.y += rightPaddle.speed;
+
+            if (leftPaddle.y < 0) leftPaddle.y = 0;
+            if (leftPaddle.y + paddleHeight > canvas.height) leftPaddle.y = canvas.height - paddleHeight;
+            if (rightPaddle.y < 0) rightPaddle.y = 0;
+            if (rightPaddle.y + paddleHeight > canvas.height) rightPaddle.y = canvas.height - paddleHeight;
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballSpeedX = -ballSpeedX;
+            ballSpeedY = (Math.random() * 2 - 1) * 2.5;
+            trailPositions = [];
+        }
+
+        function handleKeydown(event) {
+            if (event.key === "w") leftPaddle.speed = -paddleSpeed;
+            if (event.key === "s") leftPaddle.speed = paddleSpeed;
+            if (event.key === "o") rightPaddle.speed = -paddleSpeed;
+            if (event.key === "l") rightPaddle.speed = paddleSpeed;
+        }
+
+        function handleKeyup(event) {
+            if (event.key === "w" || event.key === "s") leftPaddle.speed = 0;
+            if (event.key === "o" || event.key === "l") rightPaddle.speed = 0;
+        }
+
+        window.addEventListener("keydown", handleKeydown);
+        window.addEventListener("keyup", handleKeyup);
+
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
