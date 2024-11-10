@@ -7,6 +7,10 @@
   <style>
       @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+      :root {
+      --main-purple: #1a0933;  /* Background color */
+      --grid-color: rgba(255, 255, 255, 0.1);  /* Grid line color */
+}
       body {
         display: flex;
         flex-direction: column;
@@ -14,9 +18,10 @@
         justify-content: center;
         height: 100vh;
         margin: 0;
-        background: linear-gradient(135deg, #3e0000, #220000);
+        background: var(--main-purple);
         font-family: 'Press Start 2P', sans-serif;
         color: #fff;
+        position: relative;
       }
 
       #game-container {
@@ -151,6 +156,39 @@
         background: #ff6f4f;
         box-shadow: 0px 0px 15px rgba(255, 111, 79, 0.8);
       }
+      .grid-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: 
+            linear-gradient(0deg, transparent 24%, 
+                var(--grid-color) 25%, 
+                var(--grid-color) 26%, 
+                transparent 27%, transparent 74%, 
+                var(--grid-color) 75%, 
+                var(--grid-color) 76%, 
+                transparent 77%, transparent),
+            linear-gradient(90deg, transparent 24%, 
+                var(--grid-color) 25%, 
+                var(--grid-color) 26%, 
+                transparent 27%, transparent 74%, 
+                var(--grid-color) 75%, 
+                var(--grid-color) 76%, 
+                transparent 77%, transparent);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+        z-index: -1;
+    }
+    @keyframes gridMove {
+      0% {
+          transform: perspective(500px) rotateX(60deg) translateY(0);
+      }
+      100% {
+          transform: perspective(500px) rotateX(60deg) translateY(50px);
+      }
+  }
   </style>
 </head>
 <body>

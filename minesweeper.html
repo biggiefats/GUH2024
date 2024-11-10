@@ -7,6 +7,10 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
     
+    :root {
+      --main-purple: #1a0933;  /* Background color */
+      --grid-color: rgba(255, 255, 255, 0.1);  /* Grid line color */
+  }
     body {
       display: flex;
       flex-direction: column;
@@ -14,7 +18,7 @@
       justify-content: center;
       height: 100vh;
       margin: 0;
-      background: linear-gradient(to bottom, #0a0a0a, #1a1a1a);
+      background: var(--main-purple);
       font-family: 'Press Start 2P', cursive;
       color: #ff00de;
       text-shadow: 0 0 10px #ff00de, 0 0 20px #ff00de;
