@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+    body, html { 
+      margin: 0; 
+      padding: 0; 
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #222;
+    }
+    canvas { 
+      background-color: #1a1a1a; 
+      display: block; 
+      margin: auto; 
+    }
+    #startButton {
+      position: absolute;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+    }
+    #startButton:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas"></canvas>
+  <button id="startButton">Start Game</button>
+  <script>
+    // Basic setup remains the same
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const startButton = document.getElementById("startButton");
+    canvas.width = 400;
+    canvas.height = 600;
+
+    // Game variables remain the same
+    let ball = { 
+      x: canvas.width / 2, 
+      y: canvas.height - 50,
+      radius: 10, 
+      color: "purple", 
+      dy: 0 
+    };
+    let gravity = 0.25;
+    let jumpForce = -5;
+    let score = 0;
+    let colors = ["purple", "yellow", "blue", "pink"];
+    let obstacles = [];
+    let colorIndex = 0;
+    let gameRunning = false;
+    let gameStarted = false;
+    let firstJump = false;
+    let cameraY = 0;
+
+    class Obstacle {
+      constructor(y) {
+        this.y = y;
+        this.rotation = 0;
+        this.speed = 0.02;
+        this.passed = false;
+      }
+
+      draw() {
+        ctx.save();
+        ctx.translate(canvas.width / 2, this.y + cameraY);
+        ctx.rotate(this.rotation);
+
+        for (let i = 0; i < 4; i++) {
+          ctx.beginPath();
+          ctx.strokeStyle = colors[i];
+          ctx.lineWidth = 15;
+          ctx.arc(0, 0, 80, (i * Math.PI) / 2, ((i + 1) * Math.PI) / 2);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      update() {
+        this.rotation += this.speed;
+      }
+    }
+
+    function createObstacle() {
+      let yPos;
+      if (obstacles.length === 0) {
+        yPos = canvas.height - 400;
+      } else {
+        yPos = Math.min(...obstacles.map(obs => obs.y)) - 300;
+      }
+      let newObstacle = new Obstacle(yPos);
+      obstacles.push(newObstacle);
+    }
+
+    function drawBall() {
+      ctx.beginPath();
+      ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      ctx.fillStyle = ball.color;
+      ctx.fill();
+    }
+
+    function switchBallColor() {
+      colorIndex = (colorIndex + 1) % colors.length;
+      ball.color = colors[colorIndex];
+    }
+
+    function checkCollision(obstacle) {
+      const relativeY = obstacle.y + cameraY;
+      const dx = ball.x - canvas.width / 2;
+      const dy = ball.y - relativeY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      const RING_RADIUS = 80;
+      const COLLISION_THRESHOLD = 15; // Ring thickness
+
+      // Check if the ball is near the obstacle's ring
+      const isWithinRing = distance > RING_RADIUS - COLLISION_THRESHOLD && distance < RING_RADIUS + COLLISION_THRESHOLD;
+  
+      if (isWithinRing) {
+          // Calculate the angle of the ball relative to the obstacle's center
+          let angle = Math.atan2(dy, dx) - obstacle.rotation;
+          if (angle < 0) angle += Math.PI * 2;  // Normalize angle to [0, 2π]
+    
+          const segment = Math.floor(angle / (Math.PI / 2)) % 4;
+          const ringColor = colors[segment];
+    
+          if (ringColor !== ball.color) {
+            // Game over condition if ball hits the wrong color
+            endGame("GAME OVER");
+            return;
+      }
+    
+      if (!obstacle.passed && ball.dy < 0) {
+        // Score increment and create a new obstacle if passed successfully
+        obstacle.passed = true;
+        score++;
+        switchBallColor();
+        createObstacle();
+      }
+    } else if (!obstacle.passed && ball.y < relativeY - 100) {
+      // Game over if the ball passes the obstacle without scoring
+      endGame("GAME OVER");
+    }
+}
+
+function endGame(message) {
+  gameRunning = false;
+  startButton.style.display = 'block';
+  startButton.textContent = 'Play Again';
+  ctx.fillStyle = "white";
+  ctx.font = "30px 'Press Start 2P'";
+  ctx.textAlign = "center";
+  ctx.fillText(message, canvas.width / 2, 150);
+  ctx.font = "20px 'Press Start 2P'";
+  ctx.fillText("SCORE: " + score, canvas.width / 2, 200);
+}
+
+
+    // Rest of the functions remain the same
+    function resetGame() {
+      ball = { 
+        x: canvas.width / 2, 
+        y: canvas.height - 50, 
+        radius: 10, 
+        color: "purple", 
+        dy: 0 
+      };
+      obstacles = [];
+      score = 0;
+      colorIndex = 0;
+      firstJump = false;
+      cameraY = 0;
+      createObstacle();
+      gameLoop();
+    }
+
+    function makeJump() {
+      if (gameRunning) {
+        if (!firstJump) {
+          firstJump = true;
+        }
+        ball.dy = jumpForce;
+      }
+    }
+
+    function gameLoop() {
+      if (!gameRunning) return;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (firstJump) {
+        ball.dy += gravity;
+        ball.y += ball.dy;
+
+        if (ball.y < canvas.height * 0.4) {
+          let diff = canvas.height * 0.4 - ball.y;
+          ball.y = canvas.height * 0.4;
+          cameraY += diff;
+        }
+
+        if (ball.y > canvas.height - ball.radius) {
+          ball.y = canvas.height - ball.radius;
+          ball.dy = 0;
+        }
+      }
+
+      obstacles = obstacles.filter(obs => obs.y + cameraY < canvas.height + 100);
+
+      if (obstacles.length < 3) {
+        createObstacle();
+      }
+
+      obstacles.forEach(obstacle => {
+        obstacle.draw();
+        obstacle.update();
+        checkCollision(obstacle);
+      });
+
+      drawBall();
+
+      ctx.fillStyle = "white";
+      ctx.font = "20px 'Press Start 2P";
+      ctx.fillText("Score: " + score, 10, 30);
+
+      if (!firstJump) {
+        ctx.fillStyle = "white";
+        ctx.font = "20px Arial";
+        ctx.textAlign = "center";
+        ctx.fillText("Press SPACE or CLICK to jump!", canvas.width/2, canvas.height/2);
+        ctx.textAlign = "left";
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    startButton.addEventListener("click", () => {
+      gameRunning = true;
+      gameStarted = true;
+      startButton.style.display = 'none';
+      resetGame();
+    });
+
+    document.addEventListener("click", makeJump);
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Space") {
+        e.preventDefault();
+        makeJump();
+      }
+    });
+
+    function drawInitialState() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawBall();
+      if (obstacles.length === 0) {
+        createObstacle();
+      }
+      obstacles.forEach(obstacle => obstacle.draw());
+      
+      ctx.fillStyle = "white";
+      ctx.font = "20px 'Press Start 2P'";
+      ctx.textAlign = "center";
+      ctx.fillText("Press SPACE or CLICK to jump!", canvas.width/2, canvas.height/2);
+      ctx.fillText("TO JUMP!", canvas.width/2, canvas.height/2 + 30);
+
+    }
+
+    drawInitialState();
+  </script>
+</body>
+</html>
